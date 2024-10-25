@@ -18,22 +18,26 @@ def prepare_dataframe(csv_file):
     return df
 
 # Load and prepare the first CSV file (sound tags)
-csv_file1 = 'sound_3A.csv'  # Replace with your first CSV file path
+csv_file1 = 'sound_1A.csv'  # Replace with your first CSV file path
 df1 = prepare_dataframe(csv_file1)
 
 # Load and prepare other CSV files (JRA video tags)
-csv_files = ['JRA3-002_3A.csv', 'JRA3-003_3A.csv', 'JRA3-004_3A.csv', 'JRA3-005_3A.csv', 'JRA3-006_3A.csv', 'JRA3-007_3A.csv', 'JRA3-008_3A.csv', 'JRA3-010_3A.csv', 'JRA3-011_3A.csv']  # Replace with your other CSV file paths
+csv_files = ['JRA3-001_1A.csv', 'JRA3-002_1A.csv', 'JRA3-003_1A.csv', 'JRA3-004_1A.csv', 'JRA3-005_1A.csv', 'JRA3-006_1A.csv', 'JRA3-007_1A.csv', 'JRA3-008_1A.csv', 'JRA3-010_1A.csv' ,  'JRA3-011_1A.csv']  # Replace with your other CSV file paths
 
 # Define a dictionary for grouped tag colors
 grouped_tag_colors = {
-    'Κένταυροι': 'red',
-    'Απόλλωνας': 'green',
-    'Γυναίκες': 'purple',
-    'Άνδρες': 'black',
-    'Ναός': 'blue'
+    'Στήλη': 'red',
+    'Αέτωμα': 'green',
+    'Πάνω δεξιά γωνία': 'purple',
+    'Κάτω αριστερή γωνία': 'black',
+    'Γυναίκα αριστερά': 'blue',
+    'Γυναίκα όρθια': 'yellow',
+    'Ενδιάμεσος άνδρας': 'brown',
 }
 
 # Define tags for each group
+
+
 tags_by_group = {
     'Κένταυροι': [
         'Κένταυροι', 'Ευρυτίωνας', 'Κέντραυροι',
@@ -50,6 +54,8 @@ tags_by_group = {
     'Άνδρες': ['Δεξιά-Πέριθους', 'Θησέας', 'Ώμος πέριθου'],
     'Ναός': ['Τρίγωνο κάτω από την  στέγη','Τρίγωνο κάτω από την στέγη']
 }
+
+
 
 # Create a reversed dictionary for quick look-up of color by tag
 tag_colors = {tag: grouped_tag_colors[group] for group, tags in tags_by_group.items() for tag in tags}
