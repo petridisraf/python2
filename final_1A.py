@@ -22,43 +22,25 @@ csv_file1 = 'sound_1A.csv'  # Replace with your first CSV file path
 df1 = prepare_dataframe(csv_file1)
 
 # Load and prepare other CSV files (JRA video tags)
-csv_files = ['JRA3-001_1A.csv', 'JRA3-002_1A.csv', 'JRA3-003_1A.csv', 'JRA3-004_1A.csv', 'JRA3-005_1A.csv', 'JRA3-006_1A.csv', 'JRA3-007_1A.csv', 'JRA3-008_1A.csv', 'JRA3-010_1A.csv' ,  'JRA3-011_1A.csv']  # Replace with your other CSV file paths
+csv_files = [
+    'JRA3-001-1A.csv', 'JRA3-002-1A.csv', 'JRA3-003-1A.csv', 
+    'JRA3-004-1A.csv', 'JRA3-005-1A.csv', 'JRA3-006-1A.csv', 
+    'JRA3-007-1A.csv', 'JRA3-008-1A.csv', 'JRA3-010-1A.csv',  
+    'JRA3-011-1A.csv'  # Replace with your other CSV file paths
+]
 
-# Define a dictionary for grouped tag colors
-grouped_tag_colors = {
+# Define individual tag colors directly
+tag_colors = {
     'Στήλη': 'red',
     'Αέτωμα': 'green',
     'Πάνω δεξιά γωνία': 'purple',
-    'Κάτω αριστερή γωνία': 'black',
-    'Γυναίκα αριστερά': 'blue',
-    'Γυναίκα όρθια': 'yellow',
+    'Κάτω αριστερή γωνία': 'blue',
+    'Γυναίκα αριστερά': 'yellow',
+    'Γυναίκα όρθια': 'black',
     'Ενδιάμεσος άνδρας': 'brown',
+    
+    # Add more tags as needed
 }
-
-# Define tags for each group
-
-
-tags_by_group = {
-    'Κένταυροι': [
-        'Κένταυροι', 'Ευρυτίωνας', 'Κέντραυροι',
-        'Συμπλέγματα', '',
-        'Κέντραυροι', '',
-        '', '',
-        '', '', '',
-        '', '', ''
-    ],
-    'Απόλλωνας': [
-        'Κέντρο-Απόλλων', 'Κέντρο-Απόλλων-Αριστερό Χέρι', 'Κέντρο-Απόλλων-Εγκοπες', 'Δεξί χέρι Απόλλωνα','Κέντρο-Απόλλων-Τόξο'
-    ],
-    'Γυναίκες': ['Λαπιθίδα', '', 'Δηιδάμεια','Λαπιθίδες'],
-    'Άνδρες': ['Δεξιά-Πέριθους', 'Θησέας', 'Ώμος πέριθου'],
-    'Ναός': ['Τρίγωνο κάτω από την  στέγη','Τρίγωνο κάτω από την στέγη']
-}
-
-
-
-# Create a reversed dictionary for quick look-up of color by tag
-tag_colors = {tag: grouped_tag_colors[group] for group, tags in tags_by_group.items() for tag in tags}
 
 fig, ax = plt.subplots(figsize=(14, 8))
 
@@ -95,8 +77,8 @@ ax.grid(True, which='both', axis='x', linestyle='--', linewidth=0.5)
 
 # Add legend in a separate window
 legend_fig = plt.figure(figsize=(8, 6))
-legend_handles = [plt.Line2D([0], [0], color=color, lw=4) for color in grouped_tag_colors.values()]
-legend_labels = list(grouped_tag_colors.keys())
+legend_handles = [plt.Line2D([0], [0], color=color, lw=4) for color in tag_colors.values()]
+legend_labels = list(tag_colors.keys())
 legend = legend_fig.legend(legend_handles, legend_labels, title="Tag Colors", loc='center')
 
 ax.set_title('Video Clips Comparison Timeline')
@@ -104,33 +86,31 @@ ax.set_title('Video Clips Comparison Timeline')
 plt.tight_layout()
 plt.show()
 
-# Function to compare tags between sound and JRA files based on team
-def compare_tags_by_team(df_sound, df_video):
-    matches_by_team = {team: [] for team in tags_by_group.keys()}
+# Function to compare tags between sound and JRA files based on tag colors
+def compare_tags_by_color(df_sound, df_video):
+    matches_by_color = {tag: [] for tag in tag_colors.keys()}
     for idx_sound, row_sound in df_sound.iterrows():
         sound_tag = row_sound['Notes']
-        sound_team = next((team for team, tags in tags_by_group.items() if sound_tag in tags), None)
-        if sound_team:
+        if sound_tag in tag_colors:
             for idx_video, row_video in df_video.iterrows():
                 video_tag = row_video['Notes']
-                video_team = next((team for team, tags in tags_by_group.items() if video_tag in tags), None)
-                if video_team == sound_team and not (
+                if video_tag == sound_tag and not (
                     row_sound['Source Out Sec'] < row_video['Source In Sec'] or 
                     row_video['Source Out Sec'] < row_sound['Source In Sec']):
                     reaction_seconds = row_sound['Source In Sec'] - row_video['Source In Sec']
-                    matches_by_team[sound_team].append((row_sound, row_video, reaction_seconds))
-    return matches_by_team
+                    matches_by_color[sound_tag].append((row_sound, row_video, reaction_seconds))
+    return matches_by_color
 
 # Compare tags for each JRA file with the sound file and write to a text file
-output_file = 'comparison_results_by_team_3A.txt'
+output_file = 'comparison_results_by_tag_color_1A.txt'
 with open(output_file, 'w', encoding='utf-8') as f:
     for csv_file in csv_files:
         df_video = prepare_dataframe(csv_file)
-        matches_by_team = compare_tags_by_team(df1, df_video)
+        matches_by_color = compare_tags_by_color(df1, df_video)
         f.write(f"Matches for {os.path.basename(csv_file)}:\n")
-        for team, matches in matches_by_team.items():
+        for tag, matches in matches_by_color.items():
             if matches:
-                f.write(f"\nTeam: {team}\n")
+                f.write(f"\nTag: {tag}\n")
                 for match in matches:
                     sound_tag = match[0]
                     video_tag = match[1]
